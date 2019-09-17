@@ -85,15 +85,18 @@ int main(int argc, char **argv)
 	f2.open("quicksort.txt");
 	input.open(argv[1]);
 	char inp[10];
+	//cout << "1" << endl;
 	while(input.getline(inp,10))
 	{
+
+	//cout << inp << endl;
 		int number = atoi(inp);
 		A.push_back(number);
 		B.push_back(number);
 	}
 	// cout<<A.size()<<" "<<B.size()<<endl;
-	mergesort(0,A.size());
-	quicksort(0,B.size());
+	mergesort(0,A.size()-1);
+	quicksort(0,B.size()-1);
 	f1<<A[0];
 	f2<<B[0];
 	for(int i=1;i<A.size();i++)
