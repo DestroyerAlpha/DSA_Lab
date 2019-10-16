@@ -2,6 +2,8 @@
 
 using namespace std;
 
+ofstream f1;
+
 bool sortbysec(const pair<int,int> &a, const pair<int,int> &b) 
 { 
     return (a.second < b.second); 
@@ -9,41 +11,94 @@ bool sortbysec(const pair<int,int> &a, const pair<int,int> &b)
 
 class Graph
 {
-	vector <vector<int>> matrix;
+	vector <vector<int>> adj_matrix;
+	vector <pair<string,int>> bfs_node;
 	int row;
 	int col;
 public:
 	Graph(int m, int n)
 	{
-		col = n;
-		row = m;
-		for(int i=0;i<row;i++)
+		row = max(m,n);
+		col = row;
+		for(int i=0;i<=row;i++)
 		{
 			vector<int> v;
-			for(int j=0;j<col;j++)
+			for(int j=0;j<=col;j++)
 			{
 				v.push_back(0);
 			}
-			matrix.push_back(v);
+			adj_matrix.push_back(v);
 		}
-		// matrix.clear();
+		// adj_matrix.clear();
 	}
 	// ~ Graph();
 
 	void insert(int u, int v)
 	{
-		matrix[u][v] = 1;
+		adj_matrix[u][v] = 1;
 	}
 	void DisplayGraph()
 	{
-		for(int i=0;i<row;i++)
+		for(int i=0;i<=row;i++)
 		{
-			for(int j=0;j<col;j++)
+			for(int j=0;j<=col;j++)
 			{
-				cout<<matrix[i][j]<<" ";
+				cout<<adj_matrix[i][j]<<" ";
 			}
 			cout<<endl;
 		}
+	}
+
+	void BFS(int s)
+	{
+		f1.open("sd.txt");
+		int start = 0;
+		int end = 0;
+		vector <int> queue;
+		int no_of_nodes = row;
+		// cout<<no_of_nodes<<endl;
+		for(int i = 0;i<=no_of_nodes;i++)
+		{
+			pair <string, int> property;
+			property.first = "white";
+			property.second = -1;
+			bfs_node.push_back(property); 
+		}
+		bfs_node[s].first = "grey";
+		bfs_node[s].second = 0;
+		queue.push_back(s);
+		end += 1;
+		while (end!=start)
+		{
+			int v = queue[start];
+			start +=1;
+			for(int i = 0;i<=col;i++)
+			{
+				int u = i;
+				if(adj_matrix[v][i]!=0)
+				{
+					if(bfs_node[u].first=="white")
+					{
+						bfs_node[u].second = bfs_node[v].second + 1;
+
+						bfs_node[u].first = "grey";
+						queue.push_back(u);
+						// cout<<u<<endl;
+						end += 1;
+					}					
+				}
+			}
+			bfs_node[v].first = "black";
+		}
+		f1.close();
+	}
+
+	void bfsfile(int i)
+	{
+		f1.open("sd.txt",ios_base::app);
+		f1<<i<<" "<<bfs_node[i].second;
+		f1<<endl;
+		f1.close();
 	}
 	
 };
@@ -77,17 +132,27 @@ int main(int argc, char **argv)
 	int row = edges[edges.size()-1].first;
 	sort(edges.begin(),edges.end(), sortbysec);
 	int col = edges[edges.size()-1].second;
-	// cout<<col<<endl;
+	// cout<<"col: "<<col<<endl;
+	// cout<<"row: "<<row<<endl;
 	Graph g(row, col);
-	// cout<<edges.size()<<endl;0
+	set <int> uni;
+	// cout<<edges.size()<<endl;
 	for(int i=0;i<edges.size();i++)
 	{
 		int u = edges[i].first;
 		int v = edges[i].second;
 		// cout<<u<<" "<<v<<endl;
 		g.insert(u,v);
+		uni.insert(u);
+		uni.insert(v);
+		// g.DisplayGraph();
 	}
-	g.DisplayGraph();
+	// g.DisplayGraph();
+	g.BFS(atoi(argv[2]));
+	sort(edges.begin(), edges.end());
+	for(auto i:uni)
+	{
+		g.bfsfile(i);
+	}
 	return 0;
 }
-
