@@ -3,6 +3,7 @@
 using namespace std;
 
 ofstream f1;
+ofstream f2;
 
 bool sortbysec(const pair<int,int> &a, const pair<int,int> &b) 
 { 
@@ -12,9 +13,12 @@ bool sortbysec(const pair<int,int> &a, const pair<int,int> &b)
 class Graph
 {
 	vector <vector<int>> adj_matrix;
+	set <int> nodes;
 	vector <pair<string,int>> bfs_node;
+	vector <vector<int>> dfs_node;
 	int row;
 	int col;
+	int t;
 public:
 	Graph(int m, int n)
 	{
@@ -29,13 +33,16 @@ public:
 			}
 			adj_matrix.push_back(v);
 		}
+		t = 0;
 		// adj_matrix.clear();
 	}
 	// ~ Graph();
 
-	void insert(int u, int v)
+	void insert_edge(int u, int v)
 	{
 		adj_matrix[u][v] = 1;
+		nodes.insert(u);
+		nodes.insert(v);
 	}
 	void DisplayGraph()
 	{
@@ -100,7 +107,67 @@ public:
 		f1<<endl;
 		f1.close();
 	}
+
+	void dfs()
+	{
+		for(int i = 0;i<=row;i++)
+		{
+			vector<int> v= {1,0,0};
+			dfs_node.push_back(v);
+		}
+		for(auto x:nodes)
+		{
+			if(dfs_node[x][0]==1)
+				dfs_visit(x);
+		}
 	
+	}
+
+	void dfs_visit(int v)
+	{
+		// cout<<v<<endl;
+		dfs_node[v][0] = 0;
+		t++;
+		dfs_node[v][1] = t;
+		// cout<<v<<" "<<t<<endl;
+		for(int i=0;i<=col;i++)
+		{
+			if(adj_matrix[v][i]==1)
+			{
+				if(dfs_node[i][0]==1)
+				{
+					dfs_visit(i);
+				}
+			}
+		}
+		t++;
+		dfs_node[v][2] = t;
+		// cout<<v<<" "<<t<<endl;
+		dfs_node[v][0] = -1;
+	}
+	
+	void t_sort()
+	{
+		f2.open("ts.txt");
+		vector <pair <int,int>> p;
+		for(auto x:nodes)
+		{
+			pair <int,int> pa;
+			pa.first = dfs_node[x][2];
+			pa.second = x;
+			p.push_back(pa);
+		}
+		sort(p.begin(), p.end());
+		for(int c=p.size()-1;c>=0;c--)
+		{
+			if(p[c].second>0)
+			{
+				f2<<p[c].second<<endl;
+			}
+		}
+
+		f2.close();
+	}
 };
 
 int main(int argc, char **argv)
@@ -142,7 +209,7 @@ int main(int argc, char **argv)
 		int u = edges[i].first;
 		int v = edges[i].second;
 		// cout<<u<<" "<<v<<endl;
-		g.insert(u,v);
+		g.insert_edge(u,v);
 		uni.insert(u);
 		uni.insert(v);
 		// g.DisplayGraph();
@@ -154,5 +221,8 @@ int main(int argc, char **argv)
 	{
 		g.bfsfile(i);
 	}
+
+	g.dfs();
+	g.t_sort();
 	return 0;
 }
